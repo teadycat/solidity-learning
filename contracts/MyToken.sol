@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// SPDX-License-Identifer: MIT
 pragma solidity ^0.8.28;
 
 contract MyToken {
@@ -14,6 +13,16 @@ contract MyToken {
         name = _name;
         symbol = _symbol;
         decimals = _decimal;
+        // transaction
+        // from, to, data, value, gas, ...
+        _mint(1*10**uint256(decimals), msg.sender); // 1 MT
+    }
+
+    function _mint(uint256 amount, address owner) internal {
+        // totalSupply = totalSupply + amount;
+        // balanceOf[owner] = balanceOf[owner] + amount;
+        totalSupply += amount;
+        balanceOf[owner] += amount;
     }
 
     // function totalSupply() external view returns (uint256) {

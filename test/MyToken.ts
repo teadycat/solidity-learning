@@ -10,7 +10,7 @@ describe("mytoken deploy", () => {
   before("should deploy", async () => {
     signers = await hre.ethers.getSigners();
     
-    myTokenC = await hre.ethers.deployContract("MyToken", ["MyToken", "MT", 18]) as MyToken;
+    myTokenC = await hre.ethers.deployContract("MyToken", ["MyToken", "MT", 18]);
     await myTokenC.waitForDeployment();
   });
 
@@ -26,12 +26,13 @@ describe("mytoken deploy", () => {
     expect(await myTokenC.decimals()).equal(18);
   });
 
-  it("should return 0 totalSupply", async () => {
-    expect(await myTokenC.totalSupply()).equal(0);
+  it("should return 1MT totalSupply", async () => {
+    expect(await myTokenC.totalSupply()).equal(1n*10n**18n);
   });
+  // 1MT = 1*10^18
 
-  it("should return 0 balance for signer 0", async () => {
+  it("should return 1MT balance for signer 0", async () => {
     const signer0 = signers[0];
-    expect(await myTokenC.balanceOf(signer0.address)).equal(0);
+    expect(await myTokenC.balanceOf(signer0.address)).equal(1n*10n**18n); // BigInt(1)=1n
   });
 });
