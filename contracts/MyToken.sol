@@ -8,7 +8,7 @@ contract MyToken {
     uint8 public decimals; // uint8 --> 8bit unsigned int, uint16, ..., uint256
 
     uint256 public totalSupply;
-    mapping(address => uint256) public balance0f;
+    mapping(address => uint256) public balanceOf;
 
     constructor(string memory _name, string memory _symbol, uint8 _decimal) {
         name = _name;
@@ -16,15 +16,15 @@ contract MyToken {
         decimals = _decimal;
     }
 
-    //function totalSupply() external view returns (uint256) {
-    //    return totalSupply;
-    //    }
+    // function totalSupply() external view returns (uint256) {
+    //     return totalSupply;
+    //     }
     
-    //function balance0f(address owner) external view returns (uint256) {
-    //    return balance0f[owner];
-    //    }
+    // function balanceOf(address owner) external view returns (uint256) {
+    //     return balanceOf[owner];
+    //     }
 
-    //function name() external view returns (string memory) {
-    //    return name;
-    //    }
+    // function name() external view returns (string memory) {
+    //     return name;
+    //     }
 }
