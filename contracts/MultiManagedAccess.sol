@@ -2,15 +2,12 @@
 pragma solidity ^0.8.28;
 
 abstract contract MultiManagedAccess {
-    uint constant MANAGER_NUMBERS = 5;
+    uint public constant MANAGER_NUMBERS = 5;
     uint immutable BACKUP_MANAGER_NUMBERS;
 
     address public owner;
     address[MANAGER_NUMBERS] public managers;
     bool[MANAGER_NUMBERS] public confirmed;
-    // manager0 > confirmed0
-    // manager1 > confirmed1
-    // ..
 
     constructor(address _owner, address[] memory _managers, uint _manager_numbers) {
         require(_managers.length == _manager_numbers, "Size unmatched");
@@ -41,8 +38,9 @@ abstract contract MultiManagedAccess {
             }
         }
 
+    // 모든 manager가 confirm하지 않은 상황에서는 "Not all confirmed yet" 에러메시지 발생(require 사용)
     modifier onlyAllConfirmed() {
-        require(allConfirmed(), "Not all managers confirmed yet");
+        require(allConfirmed(), "Not all confirmed yet");
         reset();
         _;
     }
@@ -56,6 +54,7 @@ abstract contract MultiManagedAccess {
                 break;
             }
         }
-        require(found, "You are not one of managers");
+        // manager가 아닌 주소로부터 발생한 transaction은 "You are not a manager" 에러메시지 발생 (require 사용)
+        require(found, "You are not a manager");
     }
 }
