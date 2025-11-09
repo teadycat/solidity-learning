@@ -78,6 +78,60 @@ describe("My Token", () => {
       .transferFrom(signer0.address, signer1.address, hre.ethers.parseUnits("1", decimals)))
       .to.be.revertedWith("insufficient allowance");
     });
-  });
 
+    // 1. approve: signer1에게 signer0의 자산 이동 권한 부여
+    it("approve signer1 to transfer signer0's tokens", async () => {
+        const signer0 = signers[0];
+        const signer1 = signers[1];
+        const amount1 = hre.ethers.parseUnits("28", decimals); // 28MT
+        
+        // signer0이 signer1에게 28MT 만큼의 자산 이동 권한 부여
+        await expect(myTokenC.approve(signer1.address, amount1))
+            .to.emit(myTokenC, "Approval")
+            .withArgs(signer1.address, amount1); 
+        
+        // allowance 확인
+        expect(await myTokenC.allowance(signer0.address, signer1.address)).equal(amount1);
+    });
+
+    // 2. transferFrom: signer1이 signer0의 MT토큰을 자신의 주소(signer1)에게 전송
+    it("signer1 transfers MT tokens from signer0 to signer1", async () => {
+        const signer0 = signers[0];
+        const signer1 = signers[1];
+        const amount1 = hre.ethers.parseUnits("28", decimals); // 28MT
+        await myTokenC.approve(signer1.address, amount1); // 다시 approve
+        
+        // signer1이 transferFrom 호출 (28MT 전송)
+        await expect(myTokenC.connect(signer1) 
+            .transferFrom(signer0.address, signer1.address, amount1))
+            .to.emit(myTokenC, "Transfer")
+            .withArgs(signer0.address, signer1.address, amount1);
+        
+        // allowance가 사용된 만큼 감소했는지 확인
+        expect(await myTokenC.allowance(signer0.address, signer1.address)).equal(0n);
+    });
+
+    // 3. balance 확인
+    it("check balances after transferFrom", async () => {
+        const initialTotalSupply = mintingAmount * 10n**decimals;
+        const signer0 = signers[0];
+        const signer1 = signers[1];
+        const amount1 = hre.ethers.parseUnits("28", decimals); // 28MT
+
+        // 다시 approve 및 transferFrom
+        await myTokenC.approve(signer1.address, amount1);
+        await myTokenC.connect(signer1).transferFrom(signer0.address, signer1.address, amount1);
+
+        // 초기 잔액 (signer0에게 100MT, signer1에게 0MT)
+        const signer1InitialBalance = 0n; 
+        
+        // signer0의 잔액은 감소 (100MT - 28MT = 72MT)
+        expect(await myTokenC.balanceOf(signer0.address))
+            .equal(initialTotalSupply - amount1);
+        
+        // signer1의 잔액은 증가 (0MT + 28MT = 28MT)
+        expect(await myTokenC.balanceOf(signer1.address))
+            .equal(signer1InitialBalance + amount1);
+    });
+  });
 });

@@ -37,6 +37,7 @@ contract MyToken {
     }
 
     function _mint(uint256 amount, address owner) internal {
+
         // totalSupply = totalSupply + amount;
         // balanceOf[owner] = balanceOf[owner] + amount;
         totalSupply += amount;
