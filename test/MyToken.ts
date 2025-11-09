@@ -45,12 +45,8 @@ describe("My Token", () => {
       const hacker = signers[2];
       const mintingAgainAmount = hre.ethers.parseUnits("100", DECIMALS);
       await expect(myTokenC.connect(hacker).mint(mintingAgainAmount, hacker.address))
-      .to.be.revertedWith("You are not authorized to manage this token");
-      // 권한 없는 유저가 mint 함수 호출 시
+      .to.be.revertedWith("You are not authorized to manage this contract");
     });
-    // await myTokenC.connect(signer2).mint(mintingAgainAmount, signer2.address);
-    // onsole.log(hre.ethers.formatUnits(await myTokenC.balanceOf(signer2.address), DECIMALS).toString() + "MT");
-    // MT print code
     // owner가 singer0이 minting하는 test 만들어보기,,
   });
 
