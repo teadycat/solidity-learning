@@ -15,7 +15,8 @@ describe("TinyBank", () => {
         myTokenC = await hre.ethers.deployContract("MyToken", 
             ["MyToken", "MT", DECIMALS, MINTING_AMOUNT]);    
         tinyBankC = await hre.ethers.deployContract("TinyBank",
-            [await myTokenC.getAddress()]); 
+            [await myTokenC.getAddress()]);
+        await myTokenC.setManager(tinyBankC.getAddress());
     });
     
     describe("Initialized state check", async () => {
