@@ -10,35 +10,12 @@ describe("TinyBank", () => {
     let myTokenC: MyToken;
     let tinyBankC: TinyBank;
     
-    // manager 등록 (조건: 3명 이상 > 5명으로 설정)
-    let owner: HardhatEthersSigner;
-    let manager1: HardhatEthersSigner;
-    let manager2: HardhatEthersSigner;
-    let manager3: HardhatEthersSigner;
-    let manager4: HardhatEthersSigner;
-    let manager5: HardhatEthersSigner;
-    let nonManager: HardhatEthersSigner;
-    let managerAddresses: string[];
-    const MANAGER_NUMBERS = 5;
-    
     beforeEach(async () => {
         signers = await hre.ethers.getSigners();
-        
-        // manager 역할 할당
-        owner = signers[0];
-        manager1 = signers[1];
-        manager2 = signers[2];
-        manager3 = signers[3];
-        manager4 = signers[4];
-        manager5 = signers[5];
-        nonManager = signers[9];
-        managerAddresses = [manager1.address, manager2.address, 
-            manager3.address, manager4.address, manager5.address];   
-
         myTokenC = await hre.ethers.deployContract("MyToken", 
-            ["MyToken", "MT", DECIMALS, MINTING_AMOUNT], owner); 
+            ["MyToken", "MT", DECIMALS, MINTING_AMOUNT]);    
         tinyBankC = await hre.ethers.deployContract("TinyBank",
-            [await myTokenC.getAddress(), owner.address, managerAddresses, MANAGER_NUMBERS]);
+            [await myTokenC.getAddress()]);
         await myTokenC.setManager(tinyBankC.getAddress());
     });
     
@@ -59,7 +36,8 @@ describe("TinyBank", () => {
             const signer0 = signers[0];
             const stakingAmount = hre.ethers.parseUnits("50", DECIMALS);
             await myTokenC.approve(await tinyBankC.getAddress(), stakingAmount);
-            await tinyBankC.stake(stakingAmount);
+            await expect(tinyBankC.stake(stakingAmount)).to.emit(tinyBankC, "Staked").withArgs(
+                signer0.address, stakingAmount);
             expect(await tinyBankC.staked(signer0.address)).equal(stakingAmount);
             expect(await tinyBankC.totalStaked()).equal(stakingAmount);
             expect(await myTokenC.balanceOf(tinyBankC)).equal(await tinyBankC.totalStaked());
@@ -72,7 +50,8 @@ describe("TinyBank", () => {
             const stakingAmount = hre.ethers.parseUnits("50", DECIMALS);
             await myTokenC.approve(await tinyBankC.getAddress(), stakingAmount);
             await tinyBankC.stake(stakingAmount);
-            await tinyBankC.withdraw(stakingAmount);
+            await expect(tinyBankC.withdraw(stakingAmount)).to.emit(tinyBankC, "Withdraw").withArgs(
+                stakingAmount, signer0.address);
             expect(await tinyBankC.staked(signer0.address)).equal(0);
         });
     });
@@ -93,22 +72,12 @@ describe("TinyBank", () => {
             expect(await myTokenC.balanceOf(signer0.address)).equal(
                 hre.ethers.parseUnits((BLOCKS + MINTING_AMOUNT + 1n).toString()));
         });
-
-        // manager가 아닌 주소로부터 발생한 transaction은 "You are not a manager" 에러메시지 발생
-        it("should revert if sender is not a manager", async () => {
-            await expect(tinyBankC.connect(nonManager).confirm())
-                .to.be.revertedWith("You are not a manager");
-        });
         
-        // 모든 manager가 confirm하지 않은 상황에서는 "Not all confirmed yet" 에러메시지 발생생
-        it("should revert when not confirmed by all managers", async () => {
+        it("should revert when changing rewardPerBlock by hacker", async () => {
+            const hacker = signers[3];
             const rewardToChange = hre.ethers.parseUnits("50", DECIMALS);
-            
-            // 가정: 5명의 manager 중 2명만 confirm
-            await tinyBankC.connect(manager1).confirm();
-            await tinyBankC.connect(manager2).confirm();
-            await expect(tinyBankC.connect(manager1).setRewardPerBlock(rewardToChange))
-                .to.be.revertedWith("Not all confirmed yet"); 
+            await expect (tinyBankC.connect(hacker).setRewardPerBlock(rewardToChange))
+                .to.be.revertedWith("You are not authorized to manage this contract");
         });
     });
 });
