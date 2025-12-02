@@ -9,18 +9,18 @@ contract MyToken is ManagedAccess {
 
     string public name;
     string public symbol;
-    uint8 public decimals; // uint8 --> 8bit unsigned int, uint16, ..., uint256
+    uint8 public decimals; 
 
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimal, uint256 _amount) 
-    ManagedAccess(msg.sender, msg.sender) {  
+    constructor(string memory _name, string memory _symbol, 
+        uint8 _decimal, uint256 _amount) ManagedAccess(msg.sender, msg.sender) {  
         name = _name;
         symbol = _symbol;
         decimals = _decimal;
-        _mint(_amount*10**uint256(decimals), msg.sender); // 1 MT
+        _mint(_amount*10**uint256(decimals), msg.sender);
     }
 
     function approve(address spender, uint256 amount) external {
@@ -42,6 +42,10 @@ contract MyToken is ManagedAccess {
         _mint(amount, to);
     }
 
+    function faucet(uint256 amount) external {
+    _mint(amount, msg.sender);
+    }
+
     function setManager(address _manager) external onlyOwner {
         manager = _manager;
     }
@@ -53,21 +57,10 @@ contract MyToken is ManagedAccess {
     }
 
     function transfer (uint256 amount, address to) external {
-        require(balanceOf[msg.sender] >= amount, "insufficient balance"); // error
+        require(balanceOf[msg.sender] >= amount, "insufficient balance");
         balanceOf[msg.sender]-= amount;
         balanceOf[to] += amount;
 
         emit Transfer(msg.sender, to, amount);
     }
 }
-
-/*
-approve
-- allow spender address to send my token
-transferFrom
-- spender: owner > target address
-
-* token owner > bank contract
-* token owner > router contract > bank contract
-* token owner > router contract > bank contract(mulit contract)
-*/

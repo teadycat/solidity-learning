@@ -6,7 +6,28 @@ const config: HardhatUserConfig = {
   solidity: "0.8.28",
   vyper: {
     version: "0.3.10"
-  }
+  },
+  networks: {
+    kairos: {
+      url: "https://public-en-kairos.node.kaia.io", 
+      accounts:["0xfc536bc2006635d4f4577efa0d4ea93416fdc5602a0d2bf47b51b5e51320368d"]
+    }
+  },
+  etherscan: {
+      apiKey: {
+        kairos: "unnecessary"
+      },
+      customChains: [
+        {
+          network: "kairos",
+          chainId: 1001,
+          urls: {
+            apiURL: "https://kairos-api.kaiascan.io/hardhat-verify",
+            browserURL: "https://kairos.kaiascan.io",
+          }
+        }
+      ]
+    }
 };
 
 export default config;
