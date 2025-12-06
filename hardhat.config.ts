@@ -10,7 +10,7 @@ const config: HardhatUserConfig = {
   networks: {
     kairos: {
       url: "https://public-en-kairos.node.kaia.io", 
-      accounts:["0xfc536bc2006635d4f4577efa0d4ea93416fdc5602a0d2bf47b51b5e51320368d"]
+      accounts:["0x3d508deb8bff41c83c00f22bfcad77d5bc73d21bd4d6378e6a509e0ab2780c3f"]
     }
   },
   etherscan: {
